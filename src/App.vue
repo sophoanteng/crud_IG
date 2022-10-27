@@ -1,22 +1,19 @@
 <template>
    <div class="container">
-    <div slot="header">
-        <b style="font-size: 27px;">Crud IG</b>
-      </div>
+      <List_Data />
    </div>
 </template>
 
 <script>
+import List_Data from './components/List_Data.vue'
   export default {
+    components: {
+      List_Data
+    },
     data() {
       return {
       }
     },
+   
   }
 </script>
-<style>
- .container{
-  text-align: center;
-  margin-top: 3%;
- }
-</style>
