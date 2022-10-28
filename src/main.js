@@ -73,6 +73,10 @@ import {
   CascaderPanel
 } from 'element-ui';
 
+
+// axios.defaults.headers.common['leela'] = 'sdfghjkert dfghje sdfghjkl'
+
+
 Vue.prototype.$http = axios
 Vue.use(ElementUI);
 Vue.config.productionTip = false
