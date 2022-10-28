@@ -125,8 +125,8 @@
     </el-dialog>
       <!-- End Modal Edit -->
       <!-- Modal create -->
-      <el-dialog title="Create Data" :visible.sync="addDialog" center width="30%">
-      <el-form ref="selectRow" :rules="valideInfo" :model="selectRow" label-position="right">
+      <el-dialog title="Create Data" :visible.sync="addDialog" center width="30%" @close="resetValidate('addData')">
+      <el-form ref="addData" :rules="valideInfo" :model="addData" label-position="right">
         <el-form-item prop="name" label="Name:" label-width="20%">
           <el-input
             v-model="addData.name"
@@ -158,7 +158,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="closeAndClear()"> Cancel </el-button>
+        <el-button @click="addDialog = false"> Cancel </el-button>
         <el-button type="primary" @click="createData()">Add</el-button>
       </span>
     </el-dialog>
@@ -220,10 +220,10 @@
     updateData(input) {
       this.dataValue = input.replace(/\s+/g, '')
     },
-    createData() {  
-      this.$refs.addData.validate(async valid => {
-        if(valid){
-          axios
+   async createData() {  
+      this.$refs.addData.validate( async valid => {
+        if (valid) {
+         await axios
         .post(
           `https://gorest.co.in/public/v2/users`, 
           { email: this.addData.email, name: this.addData.name, gender: this.addData.gender, status: this.addData.status },
@@ -235,11 +235,10 @@
         ).then((res) => {
           this.addData = res.data
         })
+                this.addDialog = !this.addDialog
+                this.fetchData()
         }
-
       })
-    this.addDialog = !this.addDialog
-    this.fetchData()
     },
     changeStatus() {
      this.addData.status === 'active' ? this.addData.status = 'inactive' : this.addData.status = 'active'
@@ -276,6 +275,13 @@
       this.editDialog = false 
       this.selectRow = row
      },
+     resetValidate(form) {
+      this.addDialog = false
+      this.editDialog = false
+      this.addData.name = ''
+      this.addData.email = ''
+      this.$refs[form].resetFields()
+    },
      deleteUser(row) {
         axios
       .delete(
