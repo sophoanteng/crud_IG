@@ -78,13 +78,6 @@
       </el-table-column>
     </el-table>
     <br>
-    <!-- <el-pagination
-      background
-      :page.sync="page"
-      :per_page.sync="per_page"
-      layout="prev, pager, next"
-      :total="total">
-    </el-pagination> -->
     <!-- Modal Edit -->
     <el-dialog title="Edit Data" :visible.sync="editDialog" center width="30%" @close="resetValidate('selectRow')">
     <el-form label-position="right" ref="selectRow" :rules="valideInfo" :model="selectRow">
@@ -201,9 +194,6 @@ export default {
         name: [{ required: true, trigger: 'blur', validator: name }],
         email: [{ required: true, trigger: 'blur', validator: email }],
       },
-      // page: 1,
-      // per_page: 20,
-      // total: 100
     }
   },
   created() {
@@ -273,27 +263,6 @@ export default {
     }
     })
     },
-  // getEditData() {
-  //   this.$refs.selectRow.validate( async valid => {
-  //     if (valid) {
-  //       axios
-  //       .put(
-  //         `https://gorest.co.in/public/v2/users/` + this.selectRow.id,
-  
-  //         { email: this.selectRow.email, name: this.selectRow.name, gender: this.selectRow.gender, status: this.selectRow.status },
-  //             {
-  //                 headers: {
-  //                     Authorization: 'Bearer 437bbabdbdd45a10dc1f92bfeec09c9715893e67426eab77b85a7d20032b088b'
-  //                 }
-  //             }
-  //       ).then((res) => {
-  //         console.log(res)
-  //       })
-  //       this.editDialog = !this.editDialog
-  //     }
-  //   })
-  //   this.fetchData()
-  // },
   closeAndClear(row) {
     this.addDialog = false 
     this.editDialog = false 
