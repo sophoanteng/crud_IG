@@ -77,55 +77,56 @@
           </template>
         </el-table-column>
       </el-table>
-      <!-- <el-pagination
+      <br>
+      <el-pagination
         background
         :page.sync="page"
         :per_page.sync="per_page"
         layout="prev, pager, next"
         :total="total">
-      </el-pagination> -->
+      </el-pagination>
       <!-- Modal Edit -->
-      <el-dialog title="Create Data" :visible.sync="editDialog" center width="30%">
-      <el-form label-position="right">
+      <el-dialog title="Edit Data" :visible.sync="editDialog" center width="30%">
+      <el-form label-position="right" :model="selectRow">
         <el-form-item prop="name" label="Name:" label-width="20%">
           <el-input
-            v-model="addData.name"
+            v-model="selectRow.name"
             type="text"
             placeholder="Name..."
             show-word-limit
           />
         </el-form-item>
-        <el-form-item prop="gender" label="Gender:" label-width="20%">
-          <el-radio  v-model="addData.gender" label="male">Male</el-radio>
-          <el-radio v-model="addData.gender" label="female">Female</el-radio>
-        </el-form-item>
         <el-form-item prop="email" label="Email:" label-width="20%">
           <el-input
-            v-model="addData.email"
+            v-model="selectRow.email"
             type="text"
             placeholder="email..."
           />
         </el-form-item>
+        <el-form-item prop="gender" label="Gender:" label-width="20%">
+          <el-radio  v-model="selectRow.gender" label="male">Male</el-radio>
+          <el-radio v-model="selectRow.gender" label="female">Female</el-radio>
+        </el-form-item>
         <el-form-item prop="status" label="Status:" label-width="20%">
             <el-switch
             style="display: block; margin-top: 10px;"
-            :value="addData.status === 'active' ? true : false"
+            :value="selectRow.status === 'active' ? true : false"
             active-color="#13ce66"
             inactive-color="#ff4949"
-            @change="changeStatus()"
+            @change="changeEditStatus()"
             >
             </el-switch>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="closeAndClear()"> Cancel </el-button>
-        <el-button type="primary" @click="createData()">Add</el-button>
+        <el-button v-if="editDialog" type="primary" @click="getEditData()">Update</el-button>
       </span>
     </el-dialog>
       <!-- End Modal Edit -->
       <!-- Modal create -->
       <el-dialog title="Create Data" :visible.sync="addDialog" center width="30%">
-      <el-form label-position="right">
+      <el-form ref="selectRow" :rules="valideInfo" :model="selectRow" label-position="right">
         <el-form-item prop="name" label="Name:" label-width="20%">
           <el-input
             v-model="addData.name"
@@ -134,16 +135,16 @@
             show-word-limit
           />
         </el-form-item>
-        <el-form-item prop="gender" label="Gender:" label-width="20%">
-          <el-radio  v-model="addData.gender" label="male">Male</el-radio>
-          <el-radio v-model="addData.gender" label="female">Female</el-radio>
-        </el-form-item>
         <el-form-item prop="email" label="Email:" label-width="20%">
           <el-input
             v-model="addData.email"
-            type="text"
+            type="email"
             placeholder="email..."
           />
+        </el-form-item>
+        <el-form-item prop="gender" label="Gender:" label-width="20%">
+          <el-radio  v-model="addData.gender" label="male">Male</el-radio>
+          <el-radio v-model="addData.gender" label="female">Female</el-radio>
         </el-form-item>
         <el-form-item prop="status" label="Status:" label-width="20%">
             <el-switch
@@ -168,6 +169,20 @@
   import  axios  from 'axios'
   export default {
     data() {
+      const name = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('name can not blank'))
+      } else {
+        callback()
+      }
+    }
+      const email = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('email can not blank'))
+      } else {
+        callback()
+      }
+    }
       return {
         listData: [],
         loading: false,
@@ -182,6 +197,10 @@
         dataValue: '',
         tableKey: 0,
         selectRow: {},
+        valideInfo: {
+          name: [{ required: true, trigger: 'blur', validator: name }],
+          email: [{ required: true, trigger: 'blur', validator: email }],
+        },
         page: 1,
         per_page: 20,
         total: 100
@@ -193,42 +212,31 @@
     },
     methods: {
       fetchData() {
-        axios
-      .get(
-        `https://gorest.co.in/public/v2/users`, 
-        // `https://gorest.co.in/public/v2/users?page=1&per_page=10`, 
-        { email: this.addData.email, name: this.addData.name, gender: this.addData.gender, status: this.addData.status, page: this.page, per_page: this.per_page },
-            {
-                headers: {
-                    Authorization: 'Bearer 437bbabdbdd45a10dc1f92bfeec09c9715893e67426eab77b85a7d20032b088b'
-                }
-            }
-      ).then((res) => {
+      const getData = "https://gorest.co.in/public/v2/users/?page=1&per_page=10";
+      this.$http.get(getData).then((res) => {
         this.listData = res.data;
-      })
-    //   const getData = "https://gorest.co.in/public/v2/users/4437";
-    //   this.$http.get(getData).then((res) => {
-    //     this.listData = res.data;
-    //     console.log(this.listData)
-    //     this.loading = true;
-    //     this.loading = false;
-    //   });
+      });
     },
     updateData(input) {
       this.dataValue = input.replace(/\s+/g, '')
     },
     createData() {  
-        axios
-      .post(
-        `https://gorest.co.in/public/v2/users`, 
-        { email: this.addData.email, name: this.addData.name, gender: this.addData.gender, status: this.addData.status },
-            {
-                headers: {
-                    Authorization: 'Bearer 437bbabdbdd45a10dc1f92bfeec09c9715893e67426eab77b85a7d20032b088b'
-                }
-            }
-      ).then((res) => {
-        this.addData = res.data
+      this.$refs.addData.validate(async valid => {
+        if(valid){
+          axios
+        .post(
+          `https://gorest.co.in/public/v2/users`, 
+          { email: this.addData.email, name: this.addData.name, gender: this.addData.gender, status: this.addData.status },
+              {
+                  headers: {
+                      Authorization: 'Bearer 437bbabdbdd45a10dc1f92bfeec09c9715893e67426eab77b85a7d20032b088b'
+                  }
+              }
+        ).then((res) => {
+          this.addData = res.data
+        })
+        }
+
       })
     this.addDialog = !this.addDialog
     this.fetchData()
@@ -236,11 +244,32 @@
     changeStatus() {
      this.addData.status === 'active' ? this.addData.status = 'inactive' : this.addData.status = 'active'
     },
+    changeEditStatus() {
+     this.selectRow.status === 'active' ? this.selectRow.status = 'inactive' : this.selectRow.status = 'active'
+    },
     showModalAdd() {
         this.addDialog = !this.addDialog
     },
-    showModalEdit() {
+    showModalEdit(row) {
         this.editDialog = !this.editDialog
+        this.selectRow = row
+    },
+    getEditData() {
+      axios
+      .put(
+        `https://gorest.co.in/public/v2/users/` + this.selectRow.id,
+
+        { email: this.selectRow.email, name: this.selectRow.name, gender: this.selectRow.gender, status: this.selectRow.status },
+            {
+                headers: {
+                    Authorization: 'Bearer 437bbabdbdd45a10dc1f92bfeec09c9715893e67426eab77b85a7d20032b088b'
+                }
+            }
+      ).then((res) => {
+        console.log(res)
+        this.fetchData()
+      })
+      this.editDialog = !this.editDialog
     },
     closeAndClear(row) {
       this.addDialog = false 
@@ -248,7 +277,6 @@
       this.selectRow = row
      },
      deleteUser(row) {
-        console.log('sdfghj', row)
         axios
       .delete(
         `https://gorest.co.in/public/v2/users/${row.id}`,
@@ -258,9 +286,8 @@
                 }
             }
       ).then((res) => {
-        // this.listData = res.data;
+        console.log(res)
         this.fetchData()
-        console.log('after delete', res)
     })
      }
     }
